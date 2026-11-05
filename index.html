@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Urban Crime — Mobile Open World</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#10151b;font-family:system-ui,-apple-system,Arial;color:#fff;touch-action:none}
+canvas{display:block}#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;overflow:hidden;background:radial-gradient(ellipse at 50% 62%,#263c50 0%,#111a25 42%,#05070a 78%);z-index:10;font-weight:700;letter-spacing:2px}
+#loading:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,4,8,.08) 0%,rgba(2,4,8,.25) 45%,#05070a 100%);z-index:1}
+#load-city{position:absolute;bottom:0;left:0;right:0;height:48%;opacity:.72;display:flex;align-items:flex-end;justify-content:center;gap:5px;filter:drop-shadow(0 0 18px #172c43)}
+#load-city i{display:block;width:7vw;max-width:70px;background:linear-gradient(90deg,#111a24,#283746,#111923);border-top:2px solid #536b7e;position:relative}
+#load-city i:after{content:"";position:absolute;inset:8px 5px;background:repeating-linear-gradient(0deg,transparent 0 12px,rgba(141,192,226,.4) 12px 15px),repeating-linear-gradient(90deg,transparent 0 10px,rgba(141,192,226,.3) 10px 13px)}
+#load-content{position:relative;z-index:2;text-align:center;width:min(88%,440px);margin-top:-5vh}
+#load-kicker{font-size:10px;letter-spacing:5px;color:#a7c1d7;margin-bottom:18px}
+#load-title{font-size:clamp(36px,10vw,62px);font-weight:1000;letter-spacing:1px;line-height:.92;text-shadow:0 4px 22px #000;margin:0}
+#load-title span{display:block;color:#d5e5f2}
+#load-sub{margin-top:14px;font-size:10px;letter-spacing:4px;color:#9bb1c4}
+#load-author{margin-top:34px;font-size:12px;letter-spacing:3px;color:#fff}
+#load-author strong{display:block;margin-top:7px;font-size:20px;letter-spacing:2px;color:#e7b56b;text-shadow:0 0 15px rgba(231,181,107,.25)}
+#load-status{margin-top:32px;font-size:10px;letter-spacing:2px;color:#9eb0be}
+#load-track{height:3px;background:rgba(255,255,255,.16);margin:10px auto 0;width:72%;overflow:hidden}
+#load-track b{display:block;height:100%;width:0;background:linear-gradient(90deg,#6a9fc6,#e7b56b);animation:loadfill 2.6s ease forwards}
+@keyframes loadfill{to{width:100%}}
+#load-footer{position:absolute;bottom:18px;left:0;right:0;text-align:center;z-index:2;color:#647584;font-size:9px;letter-spacing:2px}
+#hud{position:fixed;top:12px;left:12px;display:flex;gap:8px;align-items:flex-start;pointer-events:none}
+.panel{background:rgba(8,12,16,.72);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:9px 12px;backdrop-filter:blur(8px);font-size:12px}
+#brand{font-weight:900;letter-spacing:1.6px;font-size:14px}#mission{margin-top:5px;color:#cbd5e1}
+#minimap{position:fixed;right:12px;top:12px;width:104px;height:104px;border:2px solid #aeb8c3;border-radius:50%;background:rgba(7,13,17,.78);overflow:hidden}
+#mapinner{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 18px,rgba(255,255,255,.12) 18px 20px),repeating-linear-gradient(90deg,transparent 0 18px,rgba(255,255,255,.12) 18px 20px)}
+#dot{position:absolute;left:50%;top:50%;width:8px;height:8px;background:#ff5b4d;border-radius:50%;box-shadow:0 0 9px #ff5b4d;transform:translate(-50%,-50%)}
+#controls{position:fixed;inset:0;pointer-events:none}
+#stick{position:absolute;left:22px;bottom:26px;width:132px;height:132px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.24);pointer-events:auto;touch-action:none}
+#nub{position:absolute;left:41px;top:41px;width:50px;height:50px;border-radius:50%;background:rgba(230,238,246,.48);border:1px solid rgba(255,255,255,.5)}
+.action{position:absolute;right:22px;bottom:30px;width:68px;height:68px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(20,25,31,.72);color:#fff;font-weight:800;pointer-events:auto;touch-action:none}
+#jump{right:100px;bottom:88px;width:54px;height:54px;font-size:12px}
+#meme{position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);padding:12px 16px;border-radius:14px;background:rgba(8,12,16,.86);border:1px solid rgba(255,210,120,.6);color:#ffe0a0;font-weight:800;font-size:14px;text-align:center;max-width:85%;opacity:0;transition:opacity .25s;pointer-events:none;z-index:5;box-shadow:0 8px 28px #0008}\n#hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:11px;color:#d3dbe4;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:10px;white-space:nowrap}
+@media(min-width:800px){#stick{opacity:.55}#hint{font-size:13px}}
+</style>
+</head>
+<body>
+<div id="loading">
+<div id="load-city"><i style="height:43%"></i><i style="height:66%"></i><i style="height:52%"></i><i style="height:83%"></i><i style="height:61%"></i><i style="height:95%"></i><i style="height:70%"></i><i style="height:48%"></i><i style="height:77%"></i><i style="height:57%"></i><i style="height:88%"></i><i style="height:50%"></i><i style="height:68%"></i></div>
+<div id="load-content"><div id="load-kicker">A MOBILE OPEN WORLD EXPERIENCE</div><h1 id="load-title">URBAN <span>CRIME</span></h1><div id="load-sub">OPEN WORLD · CITY LIFE</div><div id="load-author">CREATED BY<strong>TTASTERHAK</strong></div><div id="load-status">ЗАГРУЗКА ГОРОДА…</div><div id="load-track"><b></b></div></div>
+<div id="load-footer">© TTASTERHAK · URBAN CRIME</div></div>
+<div id="hud"><div class="panel"><div id="brand">URBAN CRIME</div><div id="mission">Свободный режим · Найди автомобиль</div></div></div>
+<div id="minimap"><div id="mapinner"></div><div id="dot"></div></div>
+<div id="controls"><div id="stick"><div id="nub"></div></div><button class="action" id="act">ВЗЯТЬ<br>АВТО</button><button class="action" id="jump">ПРЫЖОК</button></div>
+<div id="meme">NPC: ЖИЗА 😎</div><div id="hint">Двигай джойстик · свайп — поворот камеры · кнопка — сесть/выйти</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+(() => {
+const loading=document.getElementById('loading');
+let bootWatchdog=setTimeout(()=>{loading.style.opacity='0';loading.style.transition='opacity .5s';setTimeout(()=>loading.style.display='none',550);},8000);
+window.addEventListener('error',()=>{loading.innerHTML='<div style="position:relative;z-index:2;text-align:center;padding:24px;color:white"><h2>URBAN CRIME</h2><p>Ошибка запуска. Проверь интернет и перезагрузи.</p><button onclick="location.reload()" style="padding:12px 20px;border-radius:10px">ПЕРЕЗАПУСТИТЬ</button></div>';loading.style.opacity='1';loading.style.display='flex';});
+if(!window.THREE){loading.textContent='Не удалось загрузить 3D-движок. Проверь интернет.';return;}
+try{if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();Telegram.WebApp.disableVerticalSwipes&&Telegram.WebApp.disableVerticalSwipes();}}catch(e){}
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x9bb4c9); scene.fog=new THREE.Fog(0x9bb4c9,95,330);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,600);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xdceaff,0x4a3c30,2.1));
+const sun=new THREE.DirectionalLight(0xffe3bd,3.0);sun.position.set(-55,95,35);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-100;sun.shadow.camera.right=100;sun.shadow.camera.top=100;sun.shadow.camera.bottom=-100;scene.add(sun);
+const mat=(color,rough=.8,metal=0)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});
+const asphalt=mat(0x34383c),concrete=mat(0x85888a),curb=mat(0xb0aaa0),grass=mat(0x536b4a),glass=mat(0x263d4a,.25,.35);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(520,520),grass);ground.rotation.x=-Math.PI/2;ground.position.y=-.08;ground.receiveShadow=true;scene.add(ground);
+function box(parent,x,y,z,sx,sy,sz,m){const o=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;}
+function canvasTexture(draw,w=256,h=256){const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');draw(ctx,w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;return t;}
+const wallTex=canvasTexture((c,w,h)=>{
+ c.fillStyle='#b6b0a5';c.fillRect(0,0,w,h);
+ for(let i=0;i<1200;i++){c.fillStyle=`rgba(${Math.random()*80},${Math.random()*70},${Math.random()*60},.12)`;c.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*3,1+Math.random()*3);}
+ c.fillStyle='#6b7073';for(let y=12;y<h;y+=42){c.fillRect(0,y,w,3);for(let x=12;x<w;x+=38){c.fillStyle='#34434d';c.fillRect(x,y+7,21,25);c.fillStyle='#8e9699';c.fillRect(x-2,y+5,25,3);c.fillStyle='#b8b1a7';}}
+},256,256);
+const brickTex=canvasTexture((c,w,h)=>{c.fillStyle='#86594a';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=18){c.fillStyle='#c2a18b';c.fillRect(0,y,w,2);for(let x=(y%36?0:18);x<w;x+=36){c.fillStyle='#5d3d34';c.fillRect(x,y,2,18);}}for(let i=0;i<600;i++){c.fillStyle='rgba(30,20,15,.10)';c.fillRect(Math.random()*w,Math.random()*h,2,2);}},256,256);
+const windowsTex=canvasTexture((c,w,h)=>{c.fillStyle='#777c80';c.fillRect(0,0,w,h);for(let y=8;y<h;y+=48)for(let x=8;x<w;x+=38){c.fillStyle='#293c4b';c.fillRect(x,y,24,32);c.fillStyle='#aeb9bf';c.fillRect(x-2,y-3,28,3);c.fillRect(x+10,y,2,32);c.fillStyle='#59656c';c.fillRect(x,y+15,24,2);}},256,256);
+const street=box(scene,0,-.02,0,520,.08,520,asphalt);street.receiveShadow=true;
+// grid streets and lanes
+for(let k=-2;k<=2;k++){
+ const z=k*70;
+ box(scene,0,.015,z,520,.04,18,asphalt);
+ box(scene,0,.04,z,520,.025,.22,mat(0xd4c9a8));
+ const x=k*70;box(scene,x,.015,0,18,.04,520,asphalt);
+ box(scene,x,.04,0,.22,.025,520,mat(0xd4c9a8));
+}
+for(let x=-210;x<=210;x+=70)for(let z=-210;z<=210;z+=70){
+ // sidewalk square blocks around road corners
+ box(scene,x+24,.10,z+24,42,.20,42,concrete);
+ box(scene,x+24,.22,z+24,39,.04,39,mat(0x6c7b60));
+}
+function makeBuilding(x,z,w,d,h,style){
+ const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
+ const tex=style===0?wallTex:style===1?brickTex:windowsTex;
+ const facade=new THREE.MeshStandardMaterial({map:tex,roughness:.88});
+ const b=box(g,0,h/2,0,w,h,d,facade);b.castShadow=true;
+ // roof cap, parapet, AC boxes and roof equipment
+ box(g,0,h+.25,0,w+.8,.5,d+.8,mat(style===1?0x4b3d37:0x777b7d));
+ for(let side of [-1,1]){box(g,side*(w/2-.25),h+.65,0,.35,.8,d,mat(0x696d70));}
+ for(let i=0;i<2;i++){box(g,(Math.random()-.5)*w*.5,h+.9,(Math.random()-.5)*d*.5,2.2,1.2,2,mat(0x62696c));}
+ // storefront with shop glass on front side
+ if(h<24){box(g,0,2.1,d/2+.04,w*.72,3.2,.12,glass);box(g,0,3.8,d/2+.12,w*.78,.18,.18,mat(0xe2c58c));}
+ return g;
+}
+for(let gx=-2;gx<=2;gx++)for(let gz=-2;gz<=2;gz++){
+ const cx=gx*70+35,cz=gz*70+35;
+ for(let n=0;n<3;n++){
+  const bx=cx+(n-1)*13+(Math.random()-.5)*4,bz=cz+(Math.random()-.5)*18;
+  const w=10+Math.random()*8,d=10+Math.random()*9,h= n===1?28+Math.random()*36:10+Math.random()*18;
+  makeBuilding(bx,bz,w,d,h,Math.floor(Math.random()*3));
+ }
+}
+// street lamps and trees
+const lampMat=mat(0x34383b,.4,.65),lampGlow=new THREE.MeshBasicMaterial({color:0xffe4a5});
+for(let i=-3;i<=3;i++)for(let j=-3;j<=3;j++){
+ const x=i*70+11,z=j*70+11;
+ box(scene,x,3.8,z,.16,7.6,.16,lampMat);box(scene,x+.9,7.4,z,.16,.16,1.8,lampMat);box(scene,x+.9,7.25,z,.55,.2,.55,lampGlow);
+ if(Math.random()>.3){const trunk=box(scene,x+5,1.6,z+4,.45,3.2,.45,mat(0x5b4433));const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(2.2,1),mat(0x3f6b48));crown.position.set(x+5,4,z+4);crown.castShadow=true;scene.add(crown);}
+}
+// humanoid player, articulated proportions with skin, clothes and shoes
+const player=new THREE.Group();scene.add(player);player.position.set(0,0,5);
+try{const saved=JSON.parse(localStorage.getItem('urbanCrimeSave')||'null');if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.z)){player.position.set(saved.x,0,saved.z);player.rotation.y=Number(saved.ry)||0;}}catch(e){}
+const skin=mat(0xb9825d),shirt=mat(0x202b3c),pants=mat(0x30343a),shoe=mat(0x111417,.5),hair=mat(0x211b18);
+function limb(parent,rad,len,m){const o=new THREE.Mesh(new THREE.CylinderGeometry(rad*.78,rad,len,10),m);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;}
+const torso=box(player,0,1.48,0,.72,.92,.38,shirt);const pelvis=box(player,0,.94,0,.58,.34,.34,pants);
+const neck=limb(player,.105,.18,skin);neck.position.y=2.02;
+const head=new THREE.Mesh(new THREE.SphereGeometry(.23,16,12),skin);head.position.set(0,2.28,0);head.scale.set(.88,1.1,.9);head.castShadow=true;player.add(head);
+const haircap=new THREE.Mesh(new THREE.SphereGeometry(.235,14,8,0,Math.PI*2,0,Math.PI*.56),hair);haircap.position.set(0,2.34,0);player.add(haircap);
+// facial features
+const eyeMat=mat(0xe6e1d5),dark=mat(0x1b1b1b);
+for(const ex of [-.085,.085]){const eye=box(player,ex,2.30,.197,.045,.035,.025,eyeMat);box(player,ex,2.30,.215,.018,.025,.012,dark);}
+const arms=[],legs=[];
+for(const side of [-1,1]){
+ const shoulder=new THREE.Group();shoulder.position.set(side*.42,1.82,0);player.add(shoulder);
+ const upper=limb(shoulder,.115,.43,shirt);upper.position.y=-.22;
+ const elbow=new THREE.Group();elbow.position.y=-.43;shoulder.add(elbow);
+ const fore=limb(elbow,.09,.40,shirt);fore.position.y=-.20;
+ const hand=new THREE.Mesh(new THREE.SphereGeometry(.085,10,8),skin);hand.position.y=-.42;elbow.add(hand);arms.push({shoulder,elbow,side});
+ const hip=new THREE.Group();hip.position.set(side*.19,.82,0);player.add(hip);
+ const thigh=limb(hip,.14,.46,pants);thigh.position.y=-.23;
+ const knee=new THREE.Group();knee.position.y=-.46;hip.add(knee);
+ const calf=limb(knee,.105,.42,pants);calf.position.y=-.21;
+ const foot=box(knee,0,-.44,.08,.22,.13,.36,shoe);legs.push({hip,knee,side});
+}
+// City pedestrians / NPCs with simple animated walk cycles and cast shadows
+const npcData=[];
+const npcQuotes=["Бро, это не баг — это фича 🤓","ЖИЗА 💀","Кто нажал Alt+F4?","Мемный вайб detected 😎","TTASTERHAK — легенда района 🔥","Я тут просто на чилле 🗿","ГТА дома, но зато своя 😭","NPC, но с характером"];
+const npcColors=[0x385b8b,0x8a3f36,0x4d7654,0x5d4b7b,0x9a7440,0x37464c,0x9a536e,0x686b70];
+function createNPC(x,z,index){
+ const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
+ const skinM=mat([0xb9825d,0x8e6045,0xd4a17c,0x6b4734][index%4]);
+ const shirtM=mat(npcColors[index%npcColors.length]),pantM=mat(index%2?0x252a31:0x42434a),shoeM=mat(0x141619);
+ const torso=box(g,0,1.42,0,.56,.78,.32,shirtM);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.19,12,10),skinM);head.position.y=2.02;head.castShadow=true;g.add(head);
+ const hairM=mat(index%3?0x241e1a:0x4b3324);const cap=new THREE.Mesh(new THREE.SphereGeometry(.195,12,8,0,Math.PI*2,0,Math.PI*.52),hairM);cap.position.y=2.08;g.add(cap);
+ const arms=[],legs=[];
+ for(const side of [-1,1]){
+  const arm=new THREE.Group();arm.position.set(side*.34,1.72,0);g.add(arm);
+  const upper=limb(arm,.075,.34,shirtM);upper.position.y=-.18;
+  const fore=limb(arm,.06,.32,skinM);fore.position.y=-.48;arms.push({arm,side});
+  const hip=new THREE.Group();hip.position.set(side*.14,.82,0);g.add(hip);
+  const thigh=limb(hip,.09,.38,pantM);thigh.position.y=-.19;
+  const calf=limb(hip,.07,.36,pantM);calf.position.y=-.55;
+  box(hip,0,-.76,.07,.16,.10,.25,shoeM);legs.push({hip,side});
+ }
+ g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+ npcData.push({g,arms,legs,phase:index*.7,baseX:x,baseZ:z,route:(index%2?1:-1),quoteCooldown:0});
+}
+for(let i=0;i<22;i++){
+ const lane=(i%4)-1.5,block=Math.floor(i/4);
+ const x=lane*15+(Math.random()-.5)*5;
+ const z=(block-2)*45+((i%2)?18:-18);
+ createNPC(x,z,i);
+}
+// vehicle
+function makeCar(x,z,color){
+ const car=new THREE.Group();car.position.set(x,0,z);scene.add(car);
+ const bodymat=mat(color,.3,.5),black=mat(0x15191d,.3,.2);
+ box(car,0,.55,0,2.05,.58,4.25,bodymat);
+ box(car,0,1.03,-.18,1.62,.75,2.15,glass);
+ box(car,0,.38,2.05,1.8,.18,.28,black);box(car,0,.38,-2.05,1.8,.18,.28,black);
+ for(const sx of [-1,1])for(const sz of [-1.35,1.35]){
+  const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.37,.37,.22,16),black);wheel.rotation.z=Math.PI/2;wheel.position.set(sx*1.02,.36,sz);wheel.castShadow=true;car.add(wheel);
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.24,12),mat(0x9aa0a5,.25,.8));hub.rotation.z=Math.PI/2;hub.position.set(sx*1.02,.36,sz);car.add(hub);
+ }
+ for(const sx of [-.65,.65]){box(car,sx,.58,2.15,.25,.12,.08,lampGlow);box(car,sx,.58,-2.15,.25,.12,.08,mat(0xb5221e));}
+ return car;
+}
+const cars=[makeCar(5,12,0x245b9b),makeCar(-12,-18,0x9b3c32),makeCar(26,42,0x777b80),makeCar(-40,55,0x303b36)];
+let driving=false,activeCar=cars[0],speed=0,angle=0,moveX=0,moveY=0,camYaw=0,camPitch=.28,walkT=0;
+const act=document.getElementById('act'),mission=document.getElementById('mission');
+act.addEventListener('pointerdown',e=>{e.preventDefault();if(!driving){let nearest=null,dist=999;cars.forEach(c=>{let d=c.position.distanceTo(player.position);if(d<dist){dist=d;nearest=c}});if(dist<9){activeCar=nearest;driving=true;mission.textContent='За рулём · исследуй город';act.innerHTML='ВЫЙТИ';}else mission.textContent='Подойди ближе к автомобилю';}else{driving=false;player.position.copy(activeCar.position);player.position.x+=2.3;mission.textContent='Свободный режим · Найди автомобиль';act.innerHTML='ВЗЯТЬ<br>АВТО';}});
+const stick=document.getElementById('stick'),nub=document.getElementById('nub');let stickId=null;
+stick.addEventListener('pointerdown',e=>{stickId=e.pointerId;stick.setPointerCapture(e.pointerId);joy(e);});
+stick.addEventListener('pointermove',e=>{if(e.pointerId===stickId)joy(e);});
+function joy(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy,lim=43,d=Math.hypot(dx,dy);if(d>lim){dx*=lim/d;dy*=lim/d;}moveX=dx/lim;moveY=dy/lim;nub.style.transform=`translate(${dx}px,${dy}px)`;}
+function resetJoy(){stickId=null;moveX=moveY=0;nub.style.transform='translate(0,0)';}
+stick.addEventListener('pointerup',resetJoy);stick.addEventListener('pointercancel',resetJoy);
+document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();if(!driving&&player.position.y<.05){player.position.y=.65;setTimeout(()=>player.position.y=0,380);}});
+let swipeId=null,lastX=0,lastY=0;
+renderer.domElement.addEventListener('pointerdown',e=>{if(e.clientX>innerWidth*.34){swipeId=e.pointerId;lastX=e.clientX;lastY=e.clientY;}});
+renderer.domElement.addEventListener('pointermove',e=>{if(swipeId===e.pointerId){camYaw-=(e.clientX-lastX)*.006;camPitch=Math.max(.08,Math.min(.7,camPitch+(e.clientY-lastY)*.003));lastX=e.clientX;lastY=e.clientY;}});
+renderer.domElement.addEventListener('pointerup',()=>swipeId=null);renderer.domElement.addEventListener('pointercancel',()=>swipeId=null);
+let last=performance.now();
+function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;walkT+=dt*9;
+npcData.forEach((n,i)=>{
+ n.phase+=dt*2.2;
+ n.g.position.x=n.baseX+Math.sin(n.phase*.35)*1.6;
+ n.g.position.z=n.baseZ+Math.cos(n.phase*.35)*1.6;
+ n.g.rotation.y=Math.atan2(Math.cos(n.phase*.35)*n.route,-Math.sin(n.phase*.35)*n.route);
+ n.legs.forEach((l,j)=>l.hip.rotation.x=Math.sin(n.phase+(j?Math.PI:0))*.42);
+ n.arms.forEach((a,j)=>a.arm.rotation.x=Math.sin(n.phase+(j?Math.PI:0))*.25);
+ n.quoteCooldown=Math.max(0,n.quoteCooldown-dt);
+ if(n.quoteCooldown<=0 && n.g.position.distanceTo(player.position)<3.8){
+  const el=document.getElementById('meme');el.textContent=npcQuotes[i%npcQuotes.length];el.style.opacity='1';n.quoteCooldown=12;
+  setTimeout(()=>el.style.opacity='0',2400);
+ }
+});
+if(Math.floor(now/2000)!==Math.floor((now-dt*1000)/2000)){try{localStorage.setItem('urbanCrimeSave',JSON.stringify({x:player.position.x,z:player.position.z,ry:player.rotation.y}));}catch(e){}}
+ if(driving){
+  speed+=( -moveY*18-speed*2.1)*dt;speed=Math.max(-8,Math.min(20,speed));
+  activeCar.rotation.y+=moveX*dt*speed*.045;
+  activeCar.position.x+=Math.sin(activeCar.rotation.y)*speed*dt;activeCar.position.z+=Math.cos(activeCar.rotation.y)*speed*dt;
+  player.position.copy(activeCar.position);player.position.y=0;
+ }else{
+  const forward=new THREE.Vector3(-Math.sin(camYaw),0,-Math.cos(camYaw)),right=new THREE.Vector3(Math.cos(camYaw),0,-Math.sin(camYaw));
+  const v=forward.multiplyScalar(-moveY).add(right.multiplyScalar(moveX));if(v.length()>1)v.normalize();
+  player.position.addScaledVector(v,dt*5.1);if(v.length()>.05)player.rotation.y=Math.atan2(v.x,v.z);
+  const walking=v.length()>.05;arms.forEach((a,i)=>{a.shoulder.rotation.x=walking?Math.sin(walkT+(i?Math.PI:0))*.48:0;a.elbow.rotation.x=walking?-.15:0;});
+  legs.forEach((l,i)=>{l.hip.rotation.x=walking?Math.sin(walkT+(i?Math.PI:0))*.62:0;l.knee.rotation.x=walking?Math.max(0,Math.sin(walkT+(i?Math.PI:0)))*.5:0;});
+ }
+ const target=driving?activeCar.position:player.position;
+ const offset=new THREE.Vector3(Math.sin(camYaw)*9,3.6+camPitch*5,Math.cos(camYaw)*9);
+ camera.position.lerp(new THREE.Vector3(target.x+offset.x,target.y+offset.y,target.z+offset.z),.12);
+ camera.lookAt(target.x,target.y+1.15,target.z);
+ renderer.render(scene,camera);
+}
+requestAnimationFrame(animate);
+clearTimeout(bootWatchdog);
+setTimeout(()=>{loading.style.opacity='0';loading.style.transition='opacity .65s ease';setTimeout(()=>loading.style.display='none',700);},2200);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+})();
+</script>
+</body></html>
