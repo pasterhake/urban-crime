@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Urban Crime — Mobile Open World</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Urban Crime TTASTERHAK — Update 3 NPC States</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#10151b;font-family:system-ui,-apple-system,Arial;color:#fff;touch-action:none}
 canvas{display:block}#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;overflow:hidden;background:radial-gradient(ellipse at 50% 62%,#263c50 0%,#111a25 42%,#05070a 78%);z-index:10;font-weight:700;letter-spacing:2px}
@@ -23,18 +23,18 @@ canvas{display:block}#loading{position:fixed;inset:0;display:flex;align-items:ce
 #load-track b{display:block;height:100%;width:0;background:linear-gradient(90deg,#6a9fc6,#e7b56b);animation:loadfill 2.6s ease forwards}
 @keyframes loadfill{to{width:100%}}
 #load-footer{position:absolute;bottom:18px;left:0;right:0;text-align:center;z-index:2;color:#647584;font-size:9px;letter-spacing:2px}
-#hud{position:fixed;top:12px;left:12px;display:flex;gap:8px;align-items:flex-start;pointer-events:none}
+#hud{position:fixed;top:calc(12px + env(safe-area-inset-top));left:calc(12px + env(safe-area-inset-left));display:flex;gap:8px;align-items:flex-start;pointer-events:none}
 .panel{background:rgba(8,12,16,.72);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:9px 12px;backdrop-filter:blur(8px);font-size:12px}
 #brand{font-weight:900;letter-spacing:1.6px;font-size:14px}#mission{margin-top:5px;color:#cbd5e1}
-#minimap{position:fixed;right:12px;top:12px;width:104px;height:104px;border:2px solid #aeb8c3;border-radius:50%;background:rgba(7,13,17,.78);overflow:hidden}
+#minimap{position:fixed;right:calc(12px + env(safe-area-inset-right));top:calc(12px + env(safe-area-inset-top));width:104px;height:104px;border:2px solid #aeb8c3;border-radius:50%;background:rgba(7,13,17,.78);overflow:hidden}
 #mapinner{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 18px,rgba(255,255,255,.12) 18px 20px),repeating-linear-gradient(90deg,transparent 0 18px,rgba(255,255,255,.12) 18px 20px)}
 #dot{position:absolute;left:50%;top:50%;width:8px;height:8px;background:#ff5b4d;border-radius:50%;box-shadow:0 0 9px #ff5b4d;transform:translate(-50%,-50%)}
 #controls{position:fixed;inset:0;pointer-events:none}
-#stick{position:absolute;left:22px;bottom:26px;width:132px;height:132px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.24);pointer-events:auto;touch-action:none}
+#stick{position:absolute;left:calc(22px + env(safe-area-inset-left));bottom:calc(26px + env(safe-area-inset-bottom));width:132px;height:132px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.24);pointer-events:auto;touch-action:none}
 #nub{position:absolute;left:41px;top:41px;width:50px;height:50px;border-radius:50%;background:rgba(230,238,246,.48);border:1px solid rgba(255,255,255,.5)}
-.action{position:absolute;right:22px;bottom:30px;width:68px;height:68px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(20,25,31,.72);color:#fff;font-weight:800;pointer-events:auto;touch-action:none}
+.action{position:absolute;right:calc(22px + env(safe-area-inset-right));bottom:calc(30px + env(safe-area-inset-bottom));width:68px;height:68px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(20,25,31,.72);color:#fff;font-weight:800;pointer-events:auto;touch-action:none}#attack{right:calc(22px + env(safe-area-inset-right));bottom:calc(112px + env(safe-area-inset-bottom));width:60px;height:60px;background:rgba(125,35,35,.82)}#rob{right:calc(94px + env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));width:60px;height:60px;background:rgba(35,105,65,.82);font-size:10px}#wallet{position:fixed;top:calc(126px + env(safe-area-inset-top));left:calc(12px + env(safe-area-inset-left));background:#08100dcc;border:1px solid #d9b56b;border-radius:10px;padding:7px 11px;font-weight:900;color:#f4d18a;font-size:13px;pointer-events:none}
 #jump{right:100px;bottom:88px;width:54px;height:54px;font-size:12px}
-#meme{position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);padding:12px 16px;border-radius:14px;background:rgba(8,12,16,.86);border:1px solid rgba(255,210,120,.6);color:#ffe0a0;font-weight:800;font-size:14px;text-align:center;max-width:85%;opacity:0;transition:opacity .25s;pointer-events:none;z-index:5;box-shadow:0 8px 28px #0008}\n#hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:11px;color:#d3dbe4;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:10px;white-space:nowrap}
+#meme{position:fixed;left:50%;top:28%;transform:translate(-50%,-50%);padding:12px 16px;border-radius:14px;background:rgba(8,12,16,.86);border:1px solid rgba(255,210,120,.6);color:#ffe0a0;font-weight:800;font-size:14px;text-align:center;max-width:85%;opacity:0;transition:opacity .25s;pointer-events:none;z-index:5;box-shadow:0 8px 28px #0008}\n#hint{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);font-size:11px;color:#d3dbe4;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:10px;white-space:nowrap}
 @media(min-width:800px){#stick{opacity:.55}#hint{font-size:13px}}
 </style>
 </head>
@@ -43,18 +43,18 @@ canvas{display:block}#loading{position:fixed;inset:0;display:flex;align-items:ce
 <div id="load-city"><i style="height:43%"></i><i style="height:66%"></i><i style="height:52%"></i><i style="height:83%"></i><i style="height:61%"></i><i style="height:95%"></i><i style="height:70%"></i><i style="height:48%"></i><i style="height:77%"></i><i style="height:57%"></i><i style="height:88%"></i><i style="height:50%"></i><i style="height:68%"></i></div>
 <div id="load-content"><div id="load-kicker">A MOBILE OPEN WORLD EXPERIENCE</div><h1 id="load-title">URBAN <span>CRIME</span></h1><div id="load-sub">OPEN WORLD · CITY LIFE</div><div id="load-author">CREATED BY<strong>TTASTERHAK</strong></div><div id="load-status">ЗАГРУЗКА ГОРОДА…</div><div id="load-track"><b></b></div></div>
 <div id="load-footer">© TTASTERHAK · URBAN CRIME</div></div>
-<div id="hud"><div class="panel"><div id="brand">URBAN CRIME</div><div id="mission">Свободный режим · Найди автомобиль</div></div></div>
+<div id="hud"><div class="panel"><div id="brand">URBAN CRIME · TTASTERHAK</div><div id="mission">Свободный режим · Найди автомобиль</div></div></div>
 <div id="minimap"><div id="mapinner"></div><div id="dot"></div></div>
-<div id="controls"><div id="stick"><div id="nub"></div></div><button class="action" id="act">ВЗЯТЬ<br>АВТО</button><button class="action" id="jump">ПРЫЖОК</button></div>
-<div id="meme">NPC: ЖИЗА 😎</div><div id="hint">Двигай джойстик · свайп — поворот камеры · кнопка — сесть/выйти</div>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<div id="controls"><div id="stick"><div id="nub"></div></div><button class="action" id="act">ВЗЯТЬ<br>АВТО</button><button class="action" id="jump">ПРЫЖОК</button><button class="action" id="attack">УДАР</button><button class="action" id="rob">ОБЫСК</button></div><div id="wallet">💵 $0</div>
+<div id="meme">NPC: ЖИЗА 😎</div><div id="hint">Джойстик · свайп — камера · ПРЫЖОК / УДАР / ОБЫСК</div>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 (() => {
 const loading=document.getElementById('loading');
 let bootWatchdog=setTimeout(()=>{loading.style.opacity='0';loading.style.transition='opacity .5s';setTimeout(()=>loading.style.display='none',550);},8000);
 window.addEventListener('error',()=>{loading.innerHTML='<div style="position:relative;z-index:2;text-align:center;padding:24px;color:white"><h2>URBAN CRIME</h2><p>Ошибка запуска. Проверь интернет и перезагрузи.</p><button onclick="location.reload()" style="padding:12px 20px;border-radius:10px">ПЕРЕЗАПУСТИТЬ</button></div>';loading.style.opacity='1';loading.style.display='flex';});
 if(!window.THREE){loading.textContent='Не удалось загрузить 3D-движок. Проверь интернет.';return;}
-try{if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();Telegram.WebApp.disableVerticalSwipes&&Telegram.WebApp.disableVerticalSwipes();}}catch(e){}
+try{if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();if(Telegram.WebApp.disableVerticalSwipes)Telegram.WebApp.disableVerticalSwipes();if(Telegram.WebApp.setBackgroundColor)Telegram.WebApp.setBackgroundColor("#10151b");if(Telegram.WebApp.setHeaderColor)Telegram.WebApp.setHeaderColor("#10151b");}}catch(e){}\ndocument.addEventListener("contextmenu",e=>e.preventDefault());document.addEventListener("gesturestart",e=>e.preventDefault(),{passive:false});
 const scene=new THREE.Scene(); scene.background=new THREE.Color(0x9bb4c9); scene.fog=new THREE.Fog(0x9bb4c9,95,330);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,600);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
@@ -127,7 +127,14 @@ const head=new THREE.Mesh(new THREE.SphereGeometry(.23,16,12),skin);head.positio
 const haircap=new THREE.Mesh(new THREE.SphereGeometry(.235,14,8,0,Math.PI*2,0,Math.PI*.56),hair);haircap.position.set(0,2.34,0);player.add(haircap);
 // facial features
 const eyeMat=mat(0xe6e1d5),dark=mat(0x1b1b1b);
-for(const ex of [-.085,.085]){const eye=box(player,ex,2.30,.197,.045,.035,.025,eyeMat);box(player,ex,2.30,.215,.018,.025,.012,dark);}
+for(const ex of [-.085,.085]){
+ const eye=box(player,ex,2.30,.197,.045,.035,.025,eyeMat);
+ box(player,ex,2.30,.215,.018,.025,.012,dark);
+ box(player,ex,2.355,.205,.055,.014,.018,hair); // eyebrows
+}
+ // nose and mouth, visible from the front
+ const nose=new THREE.Mesh(new THREE.SphereGeometry(.027,8,8),skin);nose.position.set(0,2.255,.218);nose.scale.set(.8,1.25,.75);player.add(nose);
+ box(player,0,2.205,.211,.075,.014,.012,dark);
 const arms=[],legs=[];
 for(const side of [-1,1]){
  const shoulder=new THREE.Group();shoulder.position.set(side*.42,1.82,0);player.add(shoulder);
@@ -142,7 +149,7 @@ for(const side of [-1,1]){
  const foot=box(knee,0,-.44,.08,.22,.13,.36,shoe);legs.push({hip,knee,side});
 }
 // City pedestrians / NPCs with simple animated walk cycles and cast shadows
-const npcData=[];
+const npcData=[]; let cash=0; let heldWeapon=null; const weaponDrops=[]; const walletEl=document.getElementById("wallet"); function setCash(v){cash=Math.max(0,cash+v);walletEl.textContent="💵 $"+cash;}
 const npcQuotes=["Бро, это не баг — это фича 🤓","ЖИЗА 💀","Кто нажал Alt+F4?","Мемный вайб detected 😎","TTASTERHAK — легенда района 🔥","Я тут просто на чилле 🗿","ГТА дома, но зато своя 😭","NPC, но с характером"];
 const npcColors=[0x385b8b,0x8a3f36,0x4d7654,0x5d4b7b,0x9a7440,0x37464c,0x9a536e,0x686b70];
 function createNPC(x,z,index){
@@ -163,7 +170,7 @@ function createNPC(x,z,index){
   box(hip,0,-.76,.07,.16,.10,.25,shoeM);legs.push({hip,side});
  }
  g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
- npcData.push({g,arms,legs,phase:index*.7,baseX:x,baseZ:z,route:(index%2?1:-1),quoteCooldown:0});
+ npcData.push({g,arms,legs,phase:index*.7,baseX:x,baseZ:z,route:(index%2?1:-1),quoteCooldown:0,state:"alive",health:2,robbed:false,index,fall:0,fallStart:0,fallTarget:0,stateTime:0,hitFlash:0});
 }
 for(let i=0;i<22;i++){
  const lane=(i%4)-1.5,block=Math.floor(i/4);
@@ -186,16 +193,85 @@ function makeCar(x,z,color){
  return car;
 }
 const cars=[makeCar(5,12,0x245b9b),makeCar(-12,-18,0x9b3c32),makeCar(26,42,0x777b80),makeCar(-40,55,0x303b36)];
-let driving=false,activeCar=cars[0],speed=0,angle=0,moveX=0,moveY=0,camYaw=0,camPitch=.28,walkT=0;
+let driving=false,activeCar=cars[0],speed=0,angle=0,moveX=0,moveY=0,camYaw=0,camPitch=.28,walkT=0,verticalVelocity=0,onGround=true;
 const act=document.getElementById('act'),mission=document.getElementById('mission');
-act.addEventListener('pointerdown',e=>{e.preventDefault();if(!driving){let nearest=null,dist=999;cars.forEach(c=>{let d=c.position.distanceTo(player.position);if(d<dist){dist=d;nearest=c}});if(dist<9){activeCar=nearest;driving=true;mission.textContent='За рулём · исследуй город';act.innerHTML='ВЫЙТИ';}else mission.textContent='Подойди ближе к автомобилю';}else{driving=false;player.position.copy(activeCar.position);player.position.x+=2.3;mission.textContent='Свободный режим · Найди автомобиль';act.innerHTML='ВЗЯТЬ<br>АВТО';}});
+act.addEventListener('pointerdown',e=>{e.preventDefault();if(!driving){let nearest=null,dist=999;cars.forEach(c=>{let d=c.position.distanceTo(player.position);if(d<dist){dist=d;nearest=c}});if(dist<9){activeCar=nearest;driving=true;mission.textContent='За рулём · исследуй город';act.innerHTML='ВЫЙТИ';}else mission.textContent='Подойди ближе к автомобилю';}else{driving=false;player.position.copy(activeCar.position);player.position.y=0;verticalVelocity=0;onGround=true;player.position.x+=2.3;mission.textContent='Свободный режим · Найди автомобиль';act.innerHTML='ВЗЯТЬ<br>АВТО';}});
 const stick=document.getElementById('stick'),nub=document.getElementById('nub');let stickId=null;
 stick.addEventListener('pointerdown',e=>{stickId=e.pointerId;stick.setPointerCapture(e.pointerId);joy(e);});
 stick.addEventListener('pointermove',e=>{if(e.pointerId===stickId)joy(e);});
 function joy(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy,lim=43,d=Math.hypot(dx,dy);if(d>lim){dx*=lim/d;dy*=lim/d;}moveX=dx/lim;moveY=dy/lim;nub.style.transform=`translate(${dx}px,${dy}px)`;}
 function resetJoy(){stickId=null;moveX=moveY=0;nub.style.transform='translate(0,0)';}
 stick.addEventListener('pointerup',resetJoy);stick.addEventListener('pointercancel',resetJoy);
-document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();if(!driving&&player.position.y<.05){player.position.y=.65;setTimeout(()=>player.position.y=0,380);}});
+document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();if(!driving&&onGround){verticalVelocity=7.2;onGround=false;}});
+
+// Non-graphic arcade combat, weapon pickups and NPC robbery.
+function dropWeaponAt(pos){
+ const g=new THREE.Group();
+ const body=box(g,0,.12,0,.16,.12,.62,mat(0x252a30,.45,.5));
+ const grip=box(g,0,.02,.16,.12,.2,.16,mat(0x17191b));
+ g.position.set(pos.x,.08,pos.z);scene.add(g);weaponDrops.push(g);
+}
+function nearestNPC(maxDist=2.7){
+ let best=null,bd=maxDist;
+ npcData.forEach(n=>{if(n.state==="alive"){const d=n.g.position.distanceTo(player.position);if(d<bd){bd=d;best=n;}}});
+ return best;
+}
+function showMeme(text){
+ const el=document.getElementById("meme");el.textContent=text;el.style.opacity="1";
+ clearTimeout(showMeme.timer);showMeme.timer=setTimeout(()=>el.style.opacity="0",2100);
+}
+function setNPCState(n,nextState){
+ if(n.state===nextState)return;
+ n.state=nextState;
+ n.stateTime=0;
+ n.fallStart=n.g.rotation.z;
+ n.fallTarget=(nextState==="alive")?0:(n.index%2?Math.PI/2:-Math.PI/2);
+ n.hitFlash=.22;
+ if(nextState==="unconscious"){
+  n.health=0;
+  showMeme("NPC потерял сознание · Можно обыскать");
+  if(Math.random()<.65)dropWeaponAt(n.g.position);
+ }else if(nextState==="dead"){
+  showMeme("NPC погиб · Можно обыскать");
+ }else if(nextState==="alive"){
+  n.health=2;n.robbed=false;n.g.position.y=0;
+ }
+}
+document.getElementById("attack").addEventListener("pointerdown",e=>{
+ e.preventDefault();if(driving)return;
+ let n=nearestNPC(3.0);
+ if(!n){
+  // A second hit on an unconscious NPC changes the state to dead.
+  let best=null,bd=2.8;
+  npcData.forEach(q=>{if(q.state==="unconscious"){const d=q.g.position.distanceTo(player.position);if(d<bd){bd=d;best=q;}}});
+  n=best;
+  if(n){setNPCState(n,"dead");return;}
+ }
+ if(n){
+  n.health-=heldWeapon?2:1;
+  n.hitFlash=.25;
+  n.arms.forEach((a,j)=>{a.arm.rotation.x=(j?1:-1)*-.9;});
+  if(n.health<=0)setNPCState(n,"unconscious");
+  else showMeme("Попадание! NPC пошатнулся");
+ }
+});
+document.getElementById("rob").addEventListener("pointerdown",e=>{
+ e.preventDefault();if(driving)return;
+ let best=null,bd=3.2;
+ npcData.forEach(n=>{if((n.state==="unconscious"||n.state==="dead")&&!n.robbed){const d=n.g.position.distanceTo(player.position);if(d<bd){bd=d;best=n;}}});
+ if(best){best.robbed=true;const amount=10+Math.floor(Math.random()*41);setCash(amount);showMeme((best.state==="dead"?"Обыск погибшего: $":"Обыск: $")+amount);}
+ else showMeme("Подойди к лежачему NPC");
+});
+function pickupNearbyWeapon(){
+ if(heldWeapon)return;
+ for(let i=weaponDrops.length-1;i>=0;i--){
+  if(weaponDrops[i].position.distanceTo(player.position)<1.8){
+   scene.remove(weaponDrops[i]);weaponDrops.splice(i,1);heldWeapon=true;
+   showMeme("Оружие подобрано · УДАР усилен");break;
+  }
+ }
+}
+
 let swipeId=null,lastX=0,lastY=0;
 renderer.domElement.addEventListener('pointerdown',e=>{if(e.clientX>innerWidth*.34){swipeId=e.pointerId;lastX=e.clientX;lastY=e.clientY;}});
 renderer.domElement.addEventListener('pointermove',e=>{if(swipeId===e.pointerId){camYaw-=(e.clientX-lastX)*.006;camPitch=Math.max(.08,Math.min(.7,camPitch+(e.clientY-lastY)*.003));lastX=e.clientX;lastY=e.clientY;}});
@@ -203,16 +279,45 @@ renderer.domElement.addEventListener('pointerup',()=>swipeId=null);renderer.domE
 let last=performance.now();
 function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;walkT+=dt*9;
 npcData.forEach((n,i)=>{
- n.phase+=dt*2.2;
- n.g.position.x=n.baseX+Math.sin(n.phase*.35)*1.6;
- n.g.position.z=n.baseZ+Math.cos(n.phase*.35)*1.6;
- n.g.rotation.y=Math.atan2(Math.cos(n.phase*.35)*n.route,-Math.sin(n.phase*.35)*n.route);
- n.legs.forEach((l,j)=>l.hip.rotation.x=Math.sin(n.phase+(j?Math.PI:0))*.42);
- n.arms.forEach((a,j)=>a.arm.rotation.x=Math.sin(n.phase+(j?Math.PI:0))*.25);
- n.quoteCooldown=Math.max(0,n.quoteCooldown-dt);
- if(n.quoteCooldown<=0 && n.g.position.distanceTo(player.position)<3.8){
-  const el=document.getElementById('meme');el.textContent=npcQuotes[i%npcQuotes.length];el.style.opacity='1';n.quoteCooldown=12;
-  setTimeout(()=>el.style.opacity='0',2400);
+ n.stateTime+=dt;
+ n.hitFlash=Math.max(0,n.hitFlash-dt);
+ if(n.state==="alive"){
+  n.phase+=dt*2.2;
+  n.g.position.x=n.baseX+Math.sin(n.phase*.35)*1.6;
+  n.g.position.z=n.baseZ+Math.cos(n.phase*.35)*1.6;
+  n.g.position.y=0;
+  n.g.rotation.x=0;
+  n.g.rotation.z=THREE.MathUtils.damp(n.g.rotation.z,0,12,dt);
+  n.g.rotation.y=Math.atan2(Math.cos(n.phase*.35)*n.route,-Math.sin(n.phase*.35)*n.route);
+  n.legs.forEach((l,j)=>l.hip.rotation.x=Math.sin(n.phase+(j?Math.PI:0))*.42);
+  n.arms.forEach((a,j)=>{
+   const swing=Math.sin(n.phase+(j?Math.PI:0))*.25;
+   a.arm.rotation.x=THREE.MathUtils.damp(a.arm.rotation.x,swing,10,dt);
+  });
+  n.quoteCooldown=Math.max(0,n.quoteCooldown-dt);
+  if(n.quoteCooldown<=0 && n.g.position.distanceTo(player.position)<3.8){
+   showMeme(npcQuotes[i%npcQuotes.length]);n.quoteCooldown=12;
+  }
+ }else{
+  // Smooth fall animation, then a stable prone pose.
+  const fallProgress=Math.min(1,n.stateTime/.48);
+  const eased=fallProgress*fallProgress*(3-2*fallProgress);
+  n.g.rotation.z=THREE.MathUtils.lerp(n.fallStart,n.fallTarget,eased);
+  n.g.position.y=THREE.MathUtils.lerp(0,.015,eased);
+  n.legs.forEach((l,j)=>{
+   const relaxed=(j?-.16:.16);
+   l.hip.rotation.x=THREE.MathUtils.damp(l.hip.rotation.x,relaxed,5,dt);
+  });
+  n.arms.forEach((a,j)=>{
+   const relaxed=n.state==="dead"?(j?-.7:.7):(j?-.35:.35);
+   a.arm.rotation.x=THREE.MathUtils.damp(a.arm.rotation.x,relaxed,5,dt);
+  });
+  if(n.state==="dead"){
+   // A subtle final pose change distinguishes a corpse from an unconscious NPC.
+   n.g.rotation.x=THREE.MathUtils.damp(n.g.rotation.x,.12,3,dt);
+  }else{
+   n.g.rotation.x=THREE.MathUtils.damp(n.g.rotation.x,0,5,dt);
+  }
  }
 });
 if(Math.floor(now/2000)!==Math.floor((now-dt*1000)/2000)){try{localStorage.setItem('urbanCrimeSave',JSON.stringify({x:player.position.x,z:player.position.z,ry:player.rotation.y}));}catch(e){}}
@@ -225,7 +330,11 @@ if(Math.floor(now/2000)!==Math.floor((now-dt*1000)/2000)){try{localStorage.setIt
   const forward=new THREE.Vector3(-Math.sin(camYaw),0,-Math.cos(camYaw)),right=new THREE.Vector3(Math.cos(camYaw),0,-Math.sin(camYaw));
   const v=forward.multiplyScalar(-moveY).add(right.multiplyScalar(moveX));if(v.length()>1)v.normalize();
   player.position.addScaledVector(v,dt*5.1);if(v.length()>.05)player.rotation.y=Math.atan2(v.x,v.z);
-  const walking=v.length()>.05;arms.forEach((a,i)=>{a.shoulder.rotation.x=walking?Math.sin(walkT+(i?Math.PI:0))*.48:0;a.elbow.rotation.x=walking?-.15:0;});
+  // Gravity, jump arc and stable landing.
+   verticalVelocity-=19.5*dt;player.position.y+=verticalVelocity*dt;
+   if(player.position.y<=0){player.position.y=0;verticalVelocity=0;onGround=true;}
+   pickupNearbyWeapon();
+   const walking=v.length()>.05;arms.forEach((a,i)=>{a.shoulder.rotation.x=walking?Math.sin(walkT+(i?Math.PI:0))*.48:0;a.elbow.rotation.x=walking?-.15:0;});
   legs.forEach((l,i)=>{l.hip.rotation.x=walking?Math.sin(walkT+(i?Math.PI:0))*.62:0;l.knee.rotation.x=walking?Math.max(0,Math.sin(walkT+(i?Math.PI:0)))*.5:0;});
  }
  const target=driving?activeCar.position:player.position;
@@ -237,7 +346,7 @@ if(Math.floor(now/2000)!==Math.floor((now-dt*1000)/2000)){try{localStorage.setIt
 requestAnimationFrame(animate);
 clearTimeout(bootWatchdog);
 setTimeout(()=>{loading.style.opacity='0';loading.style.transition='opacity .65s ease';setTimeout(()=>loading.style.display='none',700);},2200);
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+function resizeGame(){const w=Math.max(1,document.documentElement.clientWidth||innerWidth);const h=Math.max(1,document.documentElement.clientHeight||innerHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));renderer.setSize(w,h);}\naddEventListener('resize',resizeGame,{passive:true});addEventListener('orientationchange',()=>setTimeout(resizeGame,180),{passive:true});if(window.visualViewport)visualViewport.addEventListener('resize',resizeGame,{passive:true});
 })();
 </script>
 </body></html>
